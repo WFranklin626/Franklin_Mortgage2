@@ -43,6 +43,8 @@
             this.lblPrinError = new System.Windows.Forms.Label();
             this.lblPayment = new System.Windows.Forms.Label();
             this.lblOtherError = new System.Windows.Forms.Label();
+            this.lblTermError = new System.Windows.Forms.Label();
+            this.lblError = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // lblPrincipal
@@ -221,12 +223,30 @@
             this.lblOtherError.Text = "Please enter a valid term";
             this.lblOtherError.Visible = false;
             // 
+            // lblTermError
+            // 
+            this.lblTermError.AutoSize = true;
+            this.lblTermError.Location = new System.Drawing.Point(42, 415);
+            this.lblTermError.Name = "lblTermError";
+            this.lblTermError.Size = new System.Drawing.Size(0, 13);
+            this.lblTermError.TabIndex = 13;
+            // 
+            // lblError
+            // 
+            this.lblError.AutoSize = true;
+            this.lblError.Location = new System.Drawing.Point(42, 414);
+            this.lblError.Name = "lblError";
+            this.lblError.Size = new System.Drawing.Size(0, 13);
+            this.lblError.TabIndex = 14;
+            // 
             // Mortgage
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ClientSize = new System.Drawing.Size(367, 495);
+            this.ClientSize = new System.Drawing.Size(381, 495);
+            this.Controls.Add(this.lblError);
+            this.Controls.Add(this.lblTermError);
             this.Controls.Add(this.lblOtherError);
             this.Controls.Add(this.lblPayment);
             this.Controls.Add(this.lblPrinError);
@@ -269,6 +289,8 @@
         private System.Windows.Forms.Label lblPrinError;
         private System.Windows.Forms.Label lblPayment;
         private System.Windows.Forms.Label lblOtherError;
+        private System.Windows.Forms.Label lblTermError;
+        private System.Windows.Forms.Label lblError;
     }
 }
 

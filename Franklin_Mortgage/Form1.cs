@@ -1,17 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
+using System.Data.SqlClient;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Franklin_Mortgage
 {
     public partial class Mortgage : Form
     {
+        private bool calculationSuccessful = false;
+
         public Mortgage()
         {
             InitializeComponent();
@@ -19,20 +16,69 @@ namespace Franklin_Mortgage
 
         private void Mortgage_Load(object sender, EventArgs e)
         {
+            SetInitialState();
+        }
+
+        private void SetInitialState()
+        {
             txtOther.Visible = false;
             lblOtherError.Visible = false;
+            lblPrinError.Visible = false;
+            lblTermError.Visible = false;
+            lblError.Visible = false;
+            lblPayment.Visible = false;
+
+            rdo15.Checked = false;
+            rdo30.Checked = false;
+            rdoOther.Checked = false;
+            cmbOther.SelectedIndex = -1;
+
+            txtPrincipal.Text = string.Empty;
+            txtOther.Text = string.Empty;
+
+            btnReset.Enabled = false;
+            calculationSuccessful = false;
+
             txtPrincipal.Focus();
         }
 
         private void btnCalculate_Click(object sender, EventArgs e)
         {
             lblPrinError.Visible = false;
+            lblTermError.Visible = false;
             lblOtherError.Visible = false;
+            lblError.Visible = false;
+            lblPayment.Visible = false;
 
-            if (!decimal.TryParse(txtPrincipal.Text, out decimal principal) || principal <= 0)
+            string errors = "";
+
+            if (!IsPrincipalValid())
             {
-                lblPrinError.Visible = true;
-                txtPrincipal.Focus();
+                errors += "Principal must contain digits only.\n";
+            }
+
+            if (!rdo15.Checked && !rdo30.Checked && !rdoOther.Checked)
+            {
+                errors += "Please select a loan term.\n";
+                lblTermError.Visible = true;
+            }
+            else if (rdoOther.Checked)
+            {
+                if (!int.TryParse(txtOther.Text, out int otherTerm) || otherTerm < 5 || otherTerm > 40)
+                {
+                    errors += "Other term must be a numeric value between 5 and 40.\n";
+                    lblOtherError.Visible = true;
+                }
+            }
+
+            if (cmbOther.SelectedIndex == -1)
+            {
+                errors += "Please select an interest rate.\n";
+            }
+
+            if (!string.IsNullOrEmpty(errors))
+            {
+                ShowErrorMessage(errors);
                 return;
             }
 
@@ -47,32 +93,42 @@ namespace Franklin_Mortgage
             }
             else
             {
-                if (!int.TryParse(txtOther.Text, out numberOfPayments))
-                {
-                    lblOtherError.Visible = true;
-                    txtOther.Focus();
-                    return;
-                }
-                numberOfPayments *= 12;
+                numberOfPayments = int.Parse(txtOther.Text) * 12;
             }
 
-            decimal interestRate;
-            if (!decimal.TryParse(cmbOther.Text, out interestRate))
-            {
-                MessageBox.Show("Please select a valid interest rate.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                cmbOther.Focus();
-                return;
-            }
-
-            decimal totalPayment = CalculateTotalPayment(principal, interestRate / 100 / 12, numberOfPayments);
+            decimal interestRate = decimal.Parse(cmbOther.Text);
+            decimal totalPayment = CalculateTotalPayment(decimal.Parse(txtPrincipal.Text), interestRate / 100 / 12, numberOfPayments);
 
             lblPayment.Text = $"Your total monthly payment will be: {totalPayment:C}";
+            lblPayment.Visible = true;
+
+            btnReset.Enabled = true;
+            calculationSuccessful = true;
         }
+
+        private void ShowErrorMessage(string errorMessage)
+        {
+            lblError.Text = errorMessage;
+            lblError.Visible = true;
+        }
+
         private decimal CalculateTotalPayment(decimal principal, decimal interestRate, int numberOfPayments)
         {
             double powerResult = Math.Pow(1 + (double)interestRate, -numberOfPayments);
             decimal result = (decimal)powerResult;
             return principal * (interestRate * result) / (1 - result);
+        }
+
+        private bool IsPrincipalValid()
+        {
+            if (!decimal.TryParse(txtPrincipal.Text, out _) || !txtPrincipal.Text.All(char.IsDigit))
+            {
+                lblPrinError.Visible = true;
+                return false;
+            }
+
+            lblPrinError.Visible = false;
+            return true;
         }
 
         private void rdoOther_CheckedChanged(object sender, EventArgs e)
@@ -83,22 +139,17 @@ namespace Franklin_Mortgage
 
         private void btnReset_Click(object sender, EventArgs e)
         {
-            txtPrincipal.Text = string.Empty;
-            rdo15.Checked = false;
-            rdo30.Checked = true;
-            rdoOther.Checked = false;
-            txtOther.Text = string.Empty;
-            txtOther.Visible = false;
-            cmbOther.SelectedIndex = 0;
-            lblPrinError.Visible = false;
-            lblOtherError.Visible = false;
-
-            txtPrincipal.Focus();
+            SetInitialState();
         }
 
         private void btnExit_Click(object sender, EventArgs e)
         {
             this.Close();
+        }
+
+        private void txtPrincipal_TextChanged(object sender, EventArgs e)
+        {
+            IsPrincipalValid();
         }
     }
 }
