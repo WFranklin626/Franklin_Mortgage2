@@ -4,7 +4,7 @@ using System.Linq;
 using System.Windows.Forms;
 
 namespace Franklin_Mortgage
-{
+{//made changes to form to rename
     public partial class Mortgage : Form
     {
         private bool calculationSuccessful = false;
